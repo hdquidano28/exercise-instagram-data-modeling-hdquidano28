@@ -1,32 +1,68 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+import enum 
+from sqlalchemy import Column, ForeignKey, Integer, String, Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy import create_engine
 from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+class StatusEnum(enum.Enum):
+    image = "image"
+    video = "video"
+    audio = "audio"
 
-class Address(Base):
-    __tablename__ = 'address'
+class Follower(Base):
+    __tablename__ = 'follower'
+
+    id = Column(Integer, primary_key=True)
+    user_from_id = Column(Integer, ForeignKey('user.id'))
+    user_to_id = Column(Integer, ForeignKey('user.id'))
+    follower = relationship('User', back_populates='follower')
+
+class User(Base):
+    __tablename__ = 'user'
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    username = Column(String(250))
+    firstname = Column(String(250))
+    lastname = Column(String(250), nullable=False)
+    email = Column(String(250), unique=True, nullable=False)
 
     def to_dict(self):
-        return {}
+        return {} 
+
+class Comment(Base):
+    __tablename__ = 'comment'
+    # Here we define columns for the table address.
+    # Notice that each column is also a normal Python instance attribute.
+    id = Column(Integer, primary_key=True)
+    comment_text = Column(String(250))
+    author_id = Column(Integer, ForeignKey('user.id'))
+    post_id = Column(Integer, ForeignKey('post.id'), nullable=False)
+    post = relationship('Post', back_populates='comments')
+    
+    
+class Post(Base):
+    __tablename__ = 'post'
+    # Here we define columns for the table address.
+    # Notice that each column is also a normal Python instance attribute.
+    id = Column(Integer, primary_key=True)
+    post_id = Column(Integer, nullable=False)
+    user_id = relationship(User)
+    
+    
+class Media(Base):
+    __tablename__ = 'media'
+    # Here we define columns for the table address.
+    # Notice that each column is also a normal Python instance attribute.
+    id = Column(Integer, primary_key=True)
+    type = Column(SQLAlchemyEnum(StatusEnum), nullable=False)
+    url = Column(String(250))
+    post_id = Column(Integer, ForeignKey('post.id'), nullable=False)
+    
 
 ## Draw from SQLAlchemy base
 try:
