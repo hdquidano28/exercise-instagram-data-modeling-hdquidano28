@@ -40,7 +40,7 @@ class Comment(Base):
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
     comment_text = Column(String(250))
-    author_id = Column(Integer, ForeignKey('user.id'))
+    author_id = Column(Integer, ForeignKey('user.username'))
     post_id = Column(Integer, ForeignKey('post.id'), nullable=False)
     post = relationship('Post', back_populates='comments')
     
